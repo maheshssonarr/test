@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Numeroscope</string>
+    <string name="enter">Enter Name/BD/Num</string>
+    <string name="check">Check</string>
+    <string name="chart">Chart</string>
+    <string name="number">*</string>
+    <string name="space">---</string>
+    <string name="predictions">Predictions</string>
+    <string name="title_activity_predictions">Predictions</string>
+    <string name="name">Name Number: </string>
+    <string name="psychic">Psychic Number: </string>
+    <string name="destiny">Destiny Number: </string>
+
+</resources>
