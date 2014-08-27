@@ -95,10 +95,14 @@ public class BaseUtils extends Activity {
 		try {
 			sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + path.toString())));
 		} catch (Exception e) {
+			log(e.getMessage());
 			
-			e.printStackTrace();
 		}
 		
+	}
+
+	private void log(String msg) {
+		System.out.println(msg);
 	}
 
 }

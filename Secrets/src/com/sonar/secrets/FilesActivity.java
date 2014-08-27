@@ -13,7 +13,7 @@ public class FilesActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_files);
+		setContentView(R.layout.activity_photos);
 		sDir=Messages.getString("FilesActivity.0"); //$NON-NLS-1$
 		aDir=Messages.getString("FilesActivity.1"); //$NON-NLS-1$
 		init();

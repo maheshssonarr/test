@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -30,7 +32,7 @@ public class BaseActivity extends BaseUtils {
 
 	protected static final int maxTime = 5;
 	protected static final String encryptedExt = "_encrypted";
-	private static int timer = 0;
+	private static int time = 0;
 	protected ListView listViewFiles;
 	protected File dir = new File(Messages.getString("BaseActivity.0")); //$NON-NLS-1$
 	protected File dirEn = new File(Messages.getString("BaseActivity.1")); //$NON-NLS-1$
@@ -48,6 +50,8 @@ public class BaseActivity extends BaseUtils {
 	private File decrypted;
 	protected Handler mHandler = new Handler();
 	private String[] oldValues;
+	private List<File> fileList=new ArrayList<File>();
+	
 
 	public BaseActivity() {
 		super();
@@ -78,7 +82,7 @@ public class BaseActivity extends BaseUtils {
 		progressBar.setVisibility(View.INVISIBLE);
 		TextView textLastLogin = (TextView) findViewById(R.id.textView1);
 		if (textLastLogin != null) {
-			textLastLogin.setText(Messages.getString("BaseActivity.2") + Login.lastLogin); //$NON-NLS-1$
+			//textLastLogin.setText(Messages.getString("BaseActivity.2") + Login.lastLogin); //$NON-NLS-1$
 		}
 
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Messages.getString("BaseActivity.3"), true)) { //$NON-NLS-1$
@@ -138,7 +142,7 @@ public class BaseActivity extends BaseUtils {
 	}
 
 	protected String[] getValues(File dir) {
-		timer = 0;
+		time = 0;
 		startTimer();
 		String[] values = dir.list();
 		files = dir.listFiles();
@@ -150,7 +154,7 @@ public class BaseActivity extends BaseUtils {
 				Arrays.sort(files, new Comparator<File>() {
 					@Override
 					public int compare(File arg0, File arg1) {
-						if (timer >= maxTime) {
+						if (time >= maxTime) {
 							return 0;
 						}
 						long length1 = getSize(arg0);
@@ -187,9 +191,9 @@ public class BaseActivity extends BaseUtils {
 					if (time1 == time2)
 						return 0;
 					else if (time1 > time2)
-						return 1;
-					else
 						return -1;
+					else
+						return 1;
 				}
 			});
 			
@@ -199,7 +203,7 @@ public class BaseActivity extends BaseUtils {
 			if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("sort", false)) {
 				float size = 0;
 				for (int i = 0; i < files.length; i++) {
-					if (timer >= maxTime) {
+					if (time >= maxTime) {
 						values[i] = files[i].getName();
 						continue;
 					}
@@ -228,7 +232,7 @@ public class BaseActivity extends BaseUtils {
 		if (length != null) {
 			return length;
 		}
-		if (timer >= maxTime) {
+		if (time >= maxTime) {
 			return file.length();
 		}
 		if (file.getPath().contains(Messages.getString("BaseActivity.5"))) {
@@ -252,13 +256,13 @@ public class BaseActivity extends BaseUtils {
 	}
 
 	private void startTimer() {
-		if (timer == 0) {
+		if (time == 0) {
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						while (timer < maxTime) {
+						while (time < maxTime) {
 							Thread.sleep(1000);
-							timer++;
+							time++;
 						}
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -278,9 +282,25 @@ public class BaseActivity extends BaseUtils {
 		List<String> l = Arrays.<String> asList(values);
 		ArrayList<String> al = new ArrayList<String>(l);
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Messages.getString("BaseActivity.6"), true)) {
-			al.add(0, Messages.getString("BaseActivity.33") + getPath(dir));
+			if(!decrypt){
+				if(getPath(dir).length()>30){
+					al.add(0, Messages.getString("BaseActivity.33") + "..."+getPath(dir).substring(getPath(dir).length()-27,getPath(dir).length()));
+				}else{
+					al.add(0, Messages.getString("BaseActivity.33") + getPath(dir));
+				}
+				if(al.size()<2){
+					al.add(1,"** Directory Empty !! **");
+				}
+			}else{
+				if(al.size()<1){
+					al.add(0,"** No Encrypted Files !! **");
+				}
+			}
+			
+			
+			
 		}
-		listViewFiles.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_checked, al.toArray(new String[al.size()])));
+		listViewFiles.setAdapter(new ArrayAdapter<String>(this, R.layout.mylist, al.toArray(new String[al.size()])));
 		listViewFiles.setItemsCanFocus(false);
 		listViewFiles.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
 		listViewFiles.setOnItemClickListener(new OnItemClickListener() {
@@ -296,6 +316,8 @@ public class BaseActivity extends BaseUtils {
 	public void refreshList(View v) {
 		if (!decrypt) {
 			setListView(getValues(dir));
+		}else{
+			setListView(getValues(dirEn));
 		}
 	}
 
@@ -343,9 +365,8 @@ public class BaseActivity extends BaseUtils {
 	}
 
 	private void open(int position) {
-		if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("preview", true)) {
-			return;
-		}
+		
+		
 		String fileName = Messages.getString("BaseActivity.27"); //$NON-NLS-1$
 		fileName = (String) listViewFiles.getItemAtPosition(position);
 		fileName = fileName.split(", Size")[0];
@@ -361,6 +382,10 @@ public class BaseActivity extends BaseUtils {
 			if (file.exists()) {
 				if (file.isDirectory()) {
 					encrypt(null);
+					return;
+				}
+				CheckBox checkbox2 = (CheckBox) findViewById(R.id.checkBox2);
+				if(checkbox2.isChecked()){
 					return;
 				}
 				try {
@@ -390,6 +415,9 @@ public class BaseActivity extends BaseUtils {
 	@SuppressLint("NewApi")
 	public void encrypt(View v) {
 		decrypt = false;
+		CheckBox checkbox1 = (CheckBox) findViewById(R.id.checkBox1);
+		checkbox1.setChecked(false);
+		
 		listViewFiles = (ListView) findViewById(R.id.listFiles);
 		String fileName = Messages.getString("BaseActivity.27"); //$NON-NLS-1$
 		if (values == null) {
@@ -407,31 +435,19 @@ public class BaseActivity extends BaseUtils {
 				file = new File(dir + Messages.getString("BaseActivity.28") + fileName); //$NON-NLS-1$
 				if (file.exists()) {
 					if (file.isDirectory()) {
-						break;
+						if(fileList.size()>1){
+							continue;
+						}else{
+							break;
+						}
 					}
 					try {
-						encrypted = new File(dirEn + Messages.getString("BaseActivity.29") + fileName + Messages.getString("BaseActivity.30")); //$NON-NLS-1$ //$NON-NLS-2$
+						encrypted = new File(dirEn + "/" + fileName + "_encrypted"); //$NON-NLS-1$ //$NON-NLS-2$
 						progressBar.setVisibility(View.VISIBLE);
 						listViewFiles.setVisibility(View.INVISIBLE);
-						//toast("Encrypting Selected File.", false);
-						new Thread(new Runnable() {
-							public void run() {
-
-								if (Utils.mv(file, encrypted)) {
-									play(R.raw.soda);
-								}
-								mHandler.post(new Runnable() {
-									public void run() {
-										progressBar.setVisibility(View.INVISIBLE);
-										listViewFiles.setVisibility(View.VISIBLE);
-										encrypt(null);
-										clearCache(dir);
-									}
-								});
-
-							}
-
-						}).start();
+						fileList.add(file);
+						fileList.add(encrypted);
+						
 					} catch (Exception e) {
 						e.getMessage();
 					}
@@ -439,9 +455,11 @@ public class BaseActivity extends BaseUtils {
 			}
 		}
 		
+		moveInThread();
+		
 		oldValues = values;
 		values = null;
-		if (file.isDirectory()) {
+		if (file.isDirectory()&&!(fileList.size()>1)) {
 			file = new File(getPath(file));
 			progressBar.setVisibility(View.VISIBLE);
 			listViewFiles.setVisibility(View.INVISIBLE);
@@ -476,8 +494,39 @@ public class BaseActivity extends BaseUtils {
 		}
 	}
 
+	private void moveInThread() {
+		if(fileList.size()<1){
+			return;
+		}
+		new Thread(new Runnable() {
+			public void run() {
+				for(int i=0;i<fileList.size();i+=2){
+					if (Utils.mv(fileList.get(i), fileList.get(i+1))) {
+						play(R.raw.soda);
+					}
+				}
+					
+				mHandler.post(new Runnable() {
+					public void run() {
+						
+						refreshList(null);
+						clearCache(dir);
+						progressBar.setVisibility(View.INVISIBLE);
+						listViewFiles.setVisibility(View.VISIBLE);
+						
+						fileList=new ArrayList<File>();
+					}
+				});
+
+			}
+
+		}).start();
+	}
+
 	public void decrypt(View v) {
 		decrypt = true;
+		CheckBox checkbox1 = (CheckBox) findViewById(R.id.checkBox1);
+		checkbox1.setChecked(false);
 		
 		listViewFiles = (ListView) findViewById(R.id.listFiles);
 		String fileName = Messages.getString("BaseActivity.34"); //$NON-NLS-1$
@@ -500,26 +549,12 @@ public class BaseActivity extends BaseUtils {
 						break;
 					}
 					try {
-						decrypted = new File(dir + Messages.getString("BaseActivity.36") + fileName.replace(Messages.getString("BaseActivity.37"), Messages.getString("BaseActivity.38"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						decrypted = new File(dir + "/" + fileName.replace(encryptedExt, "").replace(encryptedExt, "").replace(encryptedExt, "").replace(encryptedExt, "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						progressBar.setVisibility(View.VISIBLE);
 						listViewFiles.setVisibility(View.INVISIBLE);
-						//toast("Decrypting Selected File.", false);
-						new Thread(new Runnable() {
-							public void run() {
-								if (Utils.mv(file, decrypted)) {
-									play(R.raw.glass);
-								}
-								mHandler.post(new Runnable() {
-									public void run() {
-										progressBar.setVisibility(View.INVISIBLE);
-										listViewFiles.setVisibility(View.VISIBLE);
-										decrypt(null);
-									}
-								});
-
-							}
-
-						}).start();
+						fileList.add(file);
+						fileList.add(decrypted);
+						
 					} catch (Exception e) {
 						e.printStackTrace();
 						return;
@@ -527,14 +562,40 @@ public class BaseActivity extends BaseUtils {
 				}
 			}
 		}
-		scanMedia(dir);
+		moveInThread();
+		//scanMedia(dir);
 		String[] values = getValues(dirEn);
 
 		List<String> l = Arrays.<String> asList(values);
 		ArrayList<String> al = new ArrayList<String>(l);
-		listViewFiles.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_checked, al.toArray(new String[al.size()])));
+		if(al.size()<1){
+			al.add(0,"** No Encrypted Files !! **");
+		}
+		listViewFiles.setAdapter(new ArrayAdapter<String>(this, R.layout.mylist, al.toArray(new String[al.size()])));
 		listViewFiles.setItemsCanFocus(false);
 		listViewFiles.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
 	}
 
+	public void selectAll(View v) {
+		CheckBox checkbox2 = (CheckBox) v;
+		int count = listViewFiles.getAdapter().getCount();
+		if(checkbox2.isChecked()){
+			for (int i = 0; i < count; i++) {
+				if(!decrypt&&i==0){
+					continue;
+				}
+				listViewFiles.setItemChecked(i, true);
+			}
+		}else{
+			for (int i = 0; i < count; i++) {
+				if(!decrypt&&i==0){
+					continue;
+				}
+				listViewFiles.setItemChecked(i, false);
+			}
+		}
+		
+		
+		
+	}
 }

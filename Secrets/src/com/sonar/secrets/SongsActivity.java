@@ -13,7 +13,7 @@ public class SongsActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_songs);
+		setContentView(R.layout.activity_photos);
 		sDir=Messages.getString("SongsActivity.0"); //$NON-NLS-1$
 		aDir=Messages.getString("SongsActivity.1"); //$NON-NLS-1$
 		init();

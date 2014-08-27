@@ -14,8 +14,6 @@ public class VideosActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_videos);
-		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photos);
 		sDir = Messages.getString("VideosActivity.0"); //$NON-NLS-1$
 		aDir = Messages.getString("VideosActivity.1"); //$NON-NLS-1$

@@ -70,11 +70,14 @@ public class Utils {
 		return decryptedText;
 	}
 
-	public static boolean mv(File src, File dst)
+	public synchronized static boolean mv(File src, File dst)
 	{
 		FileChannel inChannel = null ;
 		FileChannel outChannel = null ;
 		boolean success=false;
+		if(src.isDirectory()){
+			return true;
+		}
 		if(dst.exists()){
 			return true;
 		}

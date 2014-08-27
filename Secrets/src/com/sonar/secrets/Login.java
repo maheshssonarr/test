@@ -32,7 +32,7 @@ public class Login extends Activity {
 	public static String message = Messages.getString("Login.0"); //$NON-NLS-1$
 	public static String lastLogin = Messages.getString("Login.1"); //$NON-NLS-1$
 
-	private static final long lockTimeout = 15;
+	private static long lockTimeout = 1;
 	private EditText editText;
 	private String secret = null;
 	private String mSecret = null;
@@ -70,6 +70,15 @@ public class Login extends Activity {
 
 		});
 
+		try {
+			openFileInput("key"); 
+		} catch (Exception e) {
+			buttonLogin.setText("Register"); 
+			textViewMsg.setText("Register New One Time Secret Code !! \nDo not forget this code. It would be used to Login every time.."); 
+			toast("Welcome to Secrets !!", false); 
+			editText.setHint(""); 
+		}
+		
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("master", false)) {
 			try {
 				openFileInput("mkey"); //$NON-NLS-1$
@@ -194,7 +203,7 @@ public class Login extends Activity {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-
+					lockTimeout*=2;
 					editText.setText(Messages.getString("Login.20")); //$NON-NLS-1$
 					help();
 					return;
@@ -238,7 +247,7 @@ public class Login extends Activity {
 					toast("Confirm Master Code Mismatch !!"); //$NON-NLS-1$
 					editText.setHint(Messages.getString("Login.27")); //$NON-NLS-1$
 					textViewMsg.setText("Enter Master Secret Code !!"); //$NON-NLS-1$
-					buttonLogin.setText(Messages.getString("Login.29")); //$NON-NLS-1$
+					buttonLogin.setText("Register"); //$NON-NLS-1$
 					editText.setText(Messages.getString("Login.30")); //$NON-NLS-1$
 					return;
 				} else {
@@ -299,7 +308,7 @@ public class Login extends Activity {
 					textViewMsg.setText(Messages.getString("Login.39")); //$NON-NLS-1$
 					editText.setHint(Messages.getString("Login.40")); //$NON-NLS-1$
 					editText.setText(Messages.getString("Login.41")); //$NON-NLS-1$
-					buttonLogin.setText(Messages.getString("Login.42")); //$NON-NLS-1$
+					buttonLogin.setText("Register"); //$NON-NLS-1$
 					return;
 				}
 				if (mSecret1 == null) {
@@ -307,7 +316,7 @@ public class Login extends Activity {
 					textViewMsg.setText("Enter Master Code First !!"); //$NON-NLS-1$
 					editText.setHint(Messages.getString("Login.44")); //$NON-NLS-1$
 					editText.setText(Messages.getString("Login.45")); //$NON-NLS-1$
-					buttonLogin.setText(Messages.getString("Login.46")); //$NON-NLS-1$
+					buttonLogin.setText("Register"); //$NON-NLS-1$
 					return;
 				}
 			}
@@ -323,9 +332,9 @@ public class Login extends Activity {
 			} else if (!message.equals(confirmCode)) {
 				confirmCode = null;
 				toast(Messages.getString("Login.51")); //$NON-NLS-1$
-				textViewMsg.setText(Messages.getString("Login.52")); //$NON-NLS-1$
+				textViewMsg.setText("Register New One Time Secret Code !! \nDo not forget this code. It would be used to Login every time.."); 
 				editText.setHint(Messages.getString("Login.53")); //$NON-NLS-1$
-				buttonLogin.setText(Messages.getString("Login.54")); //$NON-NLS-1$
+				buttonLogin.setText("Register"); //$NON-NLS-1$
 				editText.setText(Messages.getString("Login.55")); //$NON-NLS-1$
 				return;
 			} else {
