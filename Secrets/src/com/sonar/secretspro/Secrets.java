@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -62,8 +63,10 @@ public class Secrets extends BaseUtils {
 		loadFilesList();
 		saveSharedText();
 		setListView();
+		
 
 	}
+
 
 	private void saveSharedText() {
 		fileName="sharedText";

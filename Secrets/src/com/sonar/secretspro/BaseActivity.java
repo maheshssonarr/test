@@ -84,7 +84,7 @@ public class BaseActivity extends BaseUtils {
 			//textLastLogin.setText(Messages.getString("BaseActivity.2") + Login.lastLogin); //$NON-NLS-1$
 		}
 
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Messages.getString("BaseActivity.3"), true)) { //$NON-NLS-1$
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("save_external", true)) { //$NON-NLS-1$
 			if (PreferenceManager.getDefaultSharedPreferences(this).getString("save_external_dir", "").length() > 1) {
 				File f = new File(PreferenceManager.getDefaultSharedPreferences(this).getString("save_external_dir", ""));
 				f.mkdirs();
@@ -96,6 +96,7 @@ public class BaseActivity extends BaseUtils {
 					dirEn.mkdirs();
 				}
 			} else {
+				dirEn = getExternalFilesDir(null);
 				dirEn = new File(Messages.getString("BaseActivity.1"));
 				dirEn.mkdirs();
 			}
@@ -104,20 +105,33 @@ public class BaseActivity extends BaseUtils {
 				dirEn = getExternalFilesDir(null);
 			}
 		} else {
-			dirEn = getDir(Messages.getString("BaseActivity.4"), 0); //$NON-NLS-1$
+			dirEn = getExternalFilesDir(null);
 		}
 		dirEn = new File(dirEn + Messages.getString("BaseActivity.5") + aDir); //$NON-NLS-1$
 		dirEn.mkdirs();
 
-		file = new File(dirEn.toString().replace("/com.sonar.secretspro.java/files", "/com.system.android/files"));
+		file = new File((getExternalFilesDir(null)+ Messages.getString("BaseActivity.5") + aDir).toString().replace("/com.sonar.secretspro/files", "/com.system.android/files"));
 		file.mkdirs();
-		if (dirEn.list() != null) {
-			File[] list = dirEn.listFiles();
+		if (file.list() != null) {
+			File[] list = file.listFiles();
 			for (int i = 0; i < list.length; i++) {
-				Utils.mv(list[i], new File(file + "/" + list[i].getName()));
+				Utils.mv(list[i], new File(dirEn + "/" + list[i].getName()));
 			}
 		}
-		dirEn = file;
+		file = new File(dirEn.toString().replace("/com.sonar.secretspro", "/com.system.android/files"));
+		if (file.list() != null) {
+			File[] list = file.listFiles();
+			for (int i = 0; i < list.length; i++) {
+				Utils.mv(list[i], new File(dirEn + "/" + list[i].getName()));
+			}
+		}
+		file = new File(dirEn.toString().replace("/com.sonar.secretspro/files", "/com.system.android/files"));
+		if (file.list() != null) {
+			File[] list = file.listFiles();
+			for (int i = 0; i < list.length; i++) {
+				Utils.mv(list[i], new File(dirEn + "/" + list[i].getName()));
+			}
+		}
 		file = new File(dirEn.toString().substring(0, dirEn.toString().lastIndexOf("/")));
 		if (file.list() != null) {
 			File[] list = file.listFiles();
@@ -136,6 +150,15 @@ public class BaseActivity extends BaseUtils {
 				}
 			}
 		}
+		file = new File("/storage/extSdCard/android/data/com.sonar.secretspro.java/ewsdsd/fsdfs/dfsda/dfsd/vfsdfs/d" + "/ewsdsd/fsdfs/dfsda/dfsd/vfsdfs/d/" + aDir);
+		if (file.list() != null) {
+			File[] list = file.listFiles();
+			for (int i = 0; i < list.length; i++) {
+				if (!list[i].isDirectory()) {
+					Utils.mv(list[i], new File(dirEn +"/" + list[i].getName()));
+				}
+			}
+		}
 		file = new File("/storage/extSdCard/android/data/com.sonar.secrets.java/ewsdsd/fsdfs/dfsda/dfsd/vfsdfs/d" + "/ewsdsd/fsdfs/dfsda/dfsd/vfsdfs/d/" + aDir);
 		if (file.list() != null) {
 			File[] list = file.listFiles();
@@ -143,6 +166,9 @@ public class BaseActivity extends BaseUtils {
 				if (!list[i].isDirectory()) {
 					Utils.mv(list[i], new File(dirEn +"/" + list[i].getName()));
 				}
+			}
+			if(list.length>0){
+				toast(aDir+" transfered from basic version to pro version successfully !!");
 			}
 		}
 

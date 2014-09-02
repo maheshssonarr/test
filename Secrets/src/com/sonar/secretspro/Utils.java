@@ -78,10 +78,11 @@ public class Utils {
 		if(src.isDirectory()){
 			return true;
 		}
-		if(dst.exists()){
+		if(src.toString().equals(dst.toString())){
 			return true;
 		}
-		if(src.toString().equals(dst.toString())){
+		if(dst.exists()){
+			success = src.delete();
 			return true;
 		}
 		if(src.renameTo(dst)){
